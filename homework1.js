@@ -1,265 +1,170 @@
 String.prototype.plus = function (other) {
-  if (typeof other !== 'string') {
-    throw new TypeError("Argument to .plus must be a string");
-  }
+    let a = this.toString();
+    let b = other.toString();
 
-  let a = this;
-  let b = other;
-  let carry = 0;
-  let result = "";
+    let result = '';
+    let carry = 0;
 
-  let i = a.length - 1;
-  let j = b.length - 1;
+    
+    while (a.length < b.length) a = '0' + a;
+    while (b.length < a.length) b = '0' + b;
 
-  while (i >= 0 || j >= 0 || carry > 0) {
-    const digitA = i >= 0 ? a.charCodeAt(i) - 48 : 0;
-    const digitB = j >= 0 ? b.charCodeAt(j) - 48 : 0;
+    // Sumar dígito por dígito desde el final
+    for (let i = a.length - 1; i >= 0; i--) {
+        const suma = parseInt(a[i]) + parseInt(b[i]) + carry;
+        result = (suma % 10) + result;
+        carry = Math.floor(suma / 10);
+    }
 
-    const sum = digitA + digitB + carry;
-    result = (sum % 10) + result;
-    carry = Math.floor(sum / 10);
+    // Si queda un acarreo final
+    if (carry > 0) {
+        result = carry + result;
+    }
 
-    i--;
-    j--;
-  }
-
-  return result;
+    return result;
 };
 
 
-function compareStrings(a, b) {
-  a = a.replace(/^0+/, '') || "0";
-  b = b.replace(/^0+/, '') || "0";
 
-  if (a.length > b.length) return 1;
-  if (a.length < b.length) return -1;
 
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] > b[i]) return 1;
-    if (a[i] < b[i]) return -1;
-  }
-
-  return 0; // Son iguales
-}
-function subtractStrings(a, b) {
-  let result = "";
-  let borrow = 0;
-
-  let i = a.length - 1;
-  let j = b.length - 1;
-
-  while (i >= 0) {
-    const digitA = a.charCodeAt(i) - 48;
-    const digitB = j >= 0 ? b.charCodeAt(j) - 48 : 0;
-
-    let sub = digitA - digitB - borrow;
-    if (sub < 0) {
-      sub += 10;
-      borrow = 1;
-    } else {
-      borrow = 0;
-    }
-
-    result = sub + result;
-    i--;
-    j--;
-  }
-
-  // Eliminar ceros iniciales
-  return result.replace(/^0+/, '') || "0";
-}
 
 
 String.prototype.minus = function (other) {
-  if (typeof other !== 'string') {
-    throw new TypeError("Argument to .minus must be a string");
-  }
+    let a = this.toString();
+    let b = other.toString();
 
-  let a = this;
-  let b = other;
+    
+    while (a.length < b.length) a = '0' + a;
+    while (b.length < a.length) b = '0' + b;
 
-  // Quitar ceros a la izquierda
-  a = a.replace(/^0+/, '') || "0";
-  b = b.replace(/^0+/, '') || "0";
+  
+    if (a < b) return '0';
 
-  // Comparar si a < b
-  if (a.length < b.length || (a.length === b.length && a < b)) {
-    throw new Error("Subtraction would result in a negative number");
-  }
+    let result = '';
+    let borrow = 0;
 
-  let result = "";
-  let borrow = 0;
-  let i = a.length - 1;
-  let j = b.length - 1;
+    // Restar dígito por dígito desde el final
+    for (let i = a.length - 1; i >= 0; i--) {
+        let digitA = parseInt(a[i]);
+        let digitB = parseInt(b[i]) + borrow;
 
-  while (i >= 0) {
-    let digitA = a.charCodeAt(i) - 48 - borrow;
-    const digitB = j >= 0 ? b.charCodeAt(j) - 48 : 0;
+        if (digitA < digitB) {
+            digitA += 10;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
 
-    if (digitA < digitB) {
-      digitA += 10;
-      borrow = 1;
-    } else {
-      borrow = 0;
+        result = (digitA - digitB) + result;
     }
 
-    const diff = digitA - digitB;
-    result = diff + result;
+    // Quitar ceros a la izquierda
+    result = result.replace(/^0+/, '');
 
-    i--;
-    j--;
-  }
-
-  return result.replace(/^0+/, '') || "0";
+    return result === '' ? '0' : result;
 };
 
 
-String.prototype.divide = function (other) {
-  if (typeof other !== 'string') {
-    throw new TypeError("Argument to .divide must be a string");
-  }
 
-  
-  const a = this.replace(/^0+/, '') || "0";
-  const b = other.replace(/^0+/, '') || "0";
 
- 
-  if (b === "0") {
-    throw new Error("Division by zero");
-  }
-
-  // comparar si el dividendo es menor que el divisor
-  const isSmaller = (x, y) => {
-    if (x.length !== y.length) return x.length < y.length;
-    return x < y;
-  };
-
-  // resta de strings positivos
-  const subtract = (x, y) => {
-    let result = "", borrow = 0;
-    let i = x.length - 1, j = y.length - 1;
-
-    while (i >= 0) {
-      let digitA = x.charCodeAt(i) - 48 - borrow;
-      const digitB = j >= 0 ? y.charCodeAt(j) - 48 : 0;
-
-      if (digitA < digitB) {
-        digitA += 10;
-        borrow = 1;
-      } else {
-        borrow = 0;
-      }
-
-      result = (digitA - digitB) + result;
-      i--; j--;
-    }
-
-    return result.replace(/^0+/, '') || "0";
-  };
-
-  
-  const multiplyByDigit = (num, digit) => {
-    if (digit === 0) return "0";
-    let carry = 0, result = "";
-    for (let i = num.length - 1; i >= 0; i--) {
-      const mul = (num.charCodeAt(i) - 48) * digit + carry;
-      result = (mul % 10) + result;
-      carry = Math.floor(mul / 10);
-    }
-    if (carry) result = carry + result;
-    return result;
-  };
-
-  let quotient = "", remainder = "";
-
-  for (let i = 0; i < a.length; i++) {
-    remainder += a[i];
-    remainder = remainder.replace(/^0+/, '') || "0";
-
-    let count = 0;
-    while (!isSmaller(remainder, b)) {
-      remainder = subtract(remainder, b);
-      count++;
-    }
-
-    quotient += count;
-  }
-
-  return quotient.replace(/^0+/, '') || "0";
-};
 
 
 String.prototype.divide = function (other) {
-  if (typeof other !== 'string') {
-    throw new TypeError("Argument to .divide must be a string");
-  }
+    let dividend = this.toString().replace(/^0+/, '') || "0";
+    let divisor = other.toString().replace(/^0+/, '') || "0";
 
-  let dividend = this.replace(/^0+/, '') || "0";
-  let divisor = other.replace(/^0+/, '') || "0";
+    if (divisor === "0") throw new Error("División por cero");
 
-  if (divisor === "0") {
-    throw new Error("Division by zero");
-  }
-
-  if (compareStrings(dividend, divisor) < 0) {
-    return "0";
-  }
-
-  let result = "";
-  let current = "";
-
-  for (let i = 0; i < dividend.length; i++) {
-    current += dividend[i];
-    current = current.replace(/^0+/, '') || "0";
-
-    let count = 0;
-    while (compareStrings(current, divisor) >= 0) {
-      current = subtractStrings(current, divisor);
-      count++;
+    // Comparar si dividend < divisor
+    if (dividend.length < divisor.length || (dividend.length === divisor.length && dividend < divisor)) {
+        return "0";
     }
 
-    result += count;
-  }
+    let result = "";
+    let temp = "";
 
-  return result.replace(/^0+/, '') || "0";
+    for (let i = 0; i < dividend.length; i++) {
+        temp += dividend[i];
+        temp = temp.replace(/^0+/, '') || "0";
+
+        
+        let count = 0;
+        while (compare(temp, divisor) >= 0) {
+            temp = subtract(temp, divisor);
+            count++;
+        }
+
+        result += count;
+    }
+
+    // Eliminar ceros a la izquierda del resultado
+    result = result.replace(/^0+/, '');
+    return result === "" ? "0" : result;
+
+    // Función auxiliar para comparar dos strings numéricos
+    function compare(a, b) {
+        if (a.length !== b.length) return a.length - b.length;
+        return a.localeCompare(b);
+    }
+
+    // Resta de a - b, con a >= b
+    function subtract(a, b) {
+        while (b.length < a.length) b = '0' + b;
+
+        let carry = 0, res = '';
+        for (let i = a.length - 1; i >= 0; i--) {
+            let digitA = parseInt(a[i]);
+            let digitB = parseInt(b[i]) + carry;
+
+            if (digitA < digitB) {
+                digitA += 10;
+                carry = 1;
+            } else {
+                carry = 0;
+            }
+
+            res = (digitA - digitB) + res;
+        }
+
+        return res.replace(/^0+/, '') || "0";
+    }
 };
 
 
 String.prototype.multiply = function (other) {
-  if (typeof other !== 'string') {
-    throw new TypeError("Argument to .multiply must be a string");
-  }
+    let a = this.toString().replace(/^0+/, '') || "0";
+    let b = other.toString().replace(/^0+/, '') || "0";
 
-  const a = this.replace(/^0+/, '') || "0";
-  const b = other.replace(/^0+/, '') || "0";
+    if (a === "0" || b === "0") return "0";
 
-  // if its 0
-  if (a === "0" || b === "0") return "0";
+    // Resultado con tamaño máximo
+    const result = Array(a.length + b.length).fill(0);
 
-  const result = Array(a.length + b.length).fill(0);
+    // Multiplicación estilo "primaria" desde el último dígito
+    for (let i = a.length - 1; i >= 0; i--) {
+        for (let j = b.length - 1; j >= 0; j--) {
+            const mul = parseInt(a[i]) * parseInt(b[j]);
+            const p1 = i + j, p2 = i + j + 1;
+            const sum = mul + result[p2];
 
-  for (let i = a.length - 1; i >= 0; i--) {
-    const digitA = a.charCodeAt(i) - 48;
-    for (let j = b.length - 1; j >= 0; j--) {
-      const digitB = b.charCodeAt(j) - 48;
-
-      const pos = i + j + 1;
-      const mul = digitA * digitB + result[pos];
-
-      result[pos] = mul % 10;
-      result[pos - 1] += Math.floor(mul / 10);
+            result[p2] = sum % 10;
+            result[p1] += Math.floor(sum / 10);
+        }
     }
-  }
 
-  
-  return result.join('').replace(/^0+/, '');
+    // Convertir array a string
+    while (result[0] === 0) result.shift();
+    return result.join('');
 };
+
 // Suma
 console.log("123456789123456789".plus("987654321987654321")); 
+console.log("123456789123456789".plus("90999999999999999999999999999999999999999999")); 
 // "1111111111111111110"
 
 // Resta
 console.log("1000000000000000000".minus("999999999999999999")); 
+console.log("10000000000000000000000000000000000000".minus("999999999999999999")); 
 // "1"
 
 // Multiplicación
