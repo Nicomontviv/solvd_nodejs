@@ -194,3 +194,4 @@ console.log(fib.next().value); // 3
 console.log(fib.next().value); // 5
 console.log(fib.next().value); // 8
 
+
