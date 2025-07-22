@@ -5,7 +5,7 @@ async function connectToDatabase() {
     user: 'postgres',
     host: 'localhost', // O el que corresponda
     database: 'library',
-    password: 'N1C0L45M0N74N4R1i$',
+    password: 'CLAVE',
     port: 5432,
   });
 
